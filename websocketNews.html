@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
 <html>
-
 <head>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
 </script>
@@ -14,40 +13,40 @@
         control.scrollTop(control.scrollTop() + 1000);
       }
       function connect() {
-        let timerSendPing;
-        let timerPong;
-        disconnect(); // разрываем соединение если функция вызвана по-ошибке
+        let timerSendIn;
+        let timerOut;
+        disconnect(); // разрываем соединение если функция вызвана по ошибке
         var wsUri = (window.location.protocol=='https:'&&'wss://'||'ws://')+window.location.host+window.location.pathname;
         conn = new WebSocket(wsUri); //открываем соединение
-        log('Connecting...');
+        log('Подключение...');
         conn.onopen = function() {
-          log('Connected.');
+          log('Подключено.');
           update_ui();
           try {
-            timerSendPing = setInterval(() => conn.send("ping"), 5000);
+            timerSendIn = setInterval(() => conn.send("in"), 5000);
           } catch (err) {
-            clearInterval(timerSendPing);
-            alert('Потеряно соединение с сервером!');
+            clearInterval(timerSendIn);
+            alert('Соединение с сервером потеряно!');
           };
         };
         conn.onmessage = function(e) {
-          if (e.data != "pong") {
-            log('Received: ' + e.data);
+          if (e.data != "out") {
+            log('Получено: ' + e.data);
           };
-          clearTimeout(timerPong);
-          timerPong = setTimeout(() => alert('Потеря соединения!'), 10000);
+          clearTimeout(timerOut);
+          timerOut = setTimeout(() => alert('Потеря соединения!'), 10000);
         };
         conn.onclose = function() {
-          clearInterval(timerSendPing);
-          clearTimeout(timerPong);
-          log('Disconnected.');
+          clearInterval(timerSendIn);
+          clearTimeout(timerOut);
+          log('Отключен.');
           conn = null;
           update_ui();
         };
       };
       function disconnect() {
         if (conn != null) {
-          log('Disconnecting...');
+          log('Отключение...');
           conn.close();
           conn = null;
           update_ui();
@@ -55,10 +54,10 @@
       };
       function update_ui() {
         if (conn == null) {
-          $('#status').text('disconnected');
+          $('#status').text('отключен');
           $('#connect').html('Connect');
         } else {
-          $('#status').text('connected (' + conn.protocol + ')');
+          $('#status').text('подключен (' + conn.protocol + ')');
           $('#connect').html('Disconnect');
         };
       };
@@ -73,7 +72,7 @@
       });
       $('#send').click(function() {
         var text = $('#text').val();
-        log('Sending: ' + text);
+        log('Отправлено сообщение: ' + text);
         conn.send(text);
         $('#text').val('').focus();
         return false;
@@ -88,17 +87,17 @@
 </script>
 </head>
 <body>
-<h3>News!</h3>
+<h2>News</h2>
 <div>
-  <button id="connect">Connect</button>&nbsp;|&nbsp;Status:
-  <span id="status">disconnected</span>
+  <button id="connect">Подключиться</button>&nbsp;|&nbsp;Status:
+  <span id="status">отключен</span>
 </div>
 <div id="log"
-     style="width:20em;height:15em;overflow:auto;border:1px solid black">
+     style="width:50em;height:35em;overflow:auto;border:3px solid black">
 </div>
 <form id="chatform" onsubmit="return false;">
   <input id="text" type="text" />
-  <input id="send" type="button" value="Send" />
+  <input id="send" type="button" value="Отправить" />
 </form>
 </body>
 </html>

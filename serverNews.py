@@ -2,7 +2,7 @@ import os
 from aiohttp import web
 import asyncio
 import time
-import aiohttp
+
 
 WS_FILE = os.path.join(os.path.dirname(__file__), "websocketNews.html")
 
@@ -15,18 +15,18 @@ async def wshandler(request: web.Request):
             return web.Response(body=fp.read(), content_type="text/html")
 
     await resp.prepare(request)
-    await resp.send_str("Welcome!!!")
+    await resp.send_str("Welcome!")
 
     try:
-        print("Someone joined.")
+        print("Somebody joined.")
         for ws in request.app["sockets"]:
-            await ws.send_str("Someone joined")
+            await ws.send_str("Somebody joined")
         request.app["sockets"].append(resp)
 
         async for msg in resp:
             if msg.type == web.WSMsgType.TEXT:
-                if msg.data == "ping":
-                    await resp.send_str("pong")
+                if msg.data == "in":
+                    await resp.send_str("out")
                 else:
                     for ws in request.app["sockets"]:
                         if ws is not resp:
